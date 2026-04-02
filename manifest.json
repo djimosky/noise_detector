@@ -1,6 +1,6 @@
 {
-  "name": "Silent Sentinel Noise Monitor",
-  "short_name": "SilentSentinel",
+  "name": "Noise Monitor",
+  "short_name": "NoiseDetector",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#f8f9fa",
