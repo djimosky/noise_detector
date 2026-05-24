@@ -4,7 +4,7 @@
     <link rel="manifest" href="manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noise Detector - Group Project</title>
+    <title>Noise Detector</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #f8f9fa; margin: 0; padding: 20px; }
         .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 400px; }
@@ -74,27 +74,20 @@
 
         async function startMonitoring() {
             try {
-                // Request Mic Access
                 stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                
-                // Initialize Audio API
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 const source = audioContext.createMediaStreamSource(stream);
                 analyzer = audioContext.createAnalyser();
                 analyzer.fftSize = 256;
                 source.connect(analyzer);
-
                 const dataArray = new Uint8Array(analyzer.frequencyBinCount);
                 
-                // UI State
                 startButton.disabled = true;
                 stopButton.disabled = false;
                 status.innerText = "Monitoring...";
 
                 function update() {
                     analyzer.getByteFrequencyData(dataArray);
-                    
-                    // Calculate Volume
                     let sum = 0;
                     for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
                     let volume = Math.min((sum / dataArray.length) * 1.2, 100);
@@ -102,29 +95,26 @@
                     filler.style.width = volume + "%";
                     const limit = parseInt(thresholdInput.value);
 
-                    // Noise Threshold Logic
                     if (volume > limit) {
-                        filler.style.background = "#ff4757"; // Red
+                        filler.style.background = "#ff4757";
                         status.innerText = "TOO LOUD!";
                         status.style.color = "#ff4757";
                         
-                        // Start looping alarm if it's paused
                         if (alarm.paused) {
                             alarm.play().catch(e => console.log("Playback blocked", e));
                         }
                     } else {
-                        // Stop and reset alarm if it's currently playing
                         if (!alarm.paused) {
                             alarm.pause();
                             alarm.currentTime = 0; 
                         }
 
                         if (volume > limit * 0.7) {
-                            filler.style.background = "#ffa502"; // Yellow
+                            filler.style.background = "#ffa502";
                             status.innerText = "Warning...";
                             status.style.color = "#ffa502";
                         } else {
-                            filler.style.background = "#2ed573"; // Green
+                            filler.style.background = "#2ed573";
                             status.innerText = "Perfectly Quiet";
                             status.style.color = "#2f3542";
                         }
@@ -146,7 +136,6 @@
             if (audioContext) {
                 audioContext.close();
             }
-            // Ensure alarm stops if active
             alarm.pause();
             alarm.currentTime = 0;
 
@@ -160,7 +149,6 @@
         startButton.onclick = startMonitoring;
         stopButton.onclick = stopMonitoring;
         
-        // PWA Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed', err));
